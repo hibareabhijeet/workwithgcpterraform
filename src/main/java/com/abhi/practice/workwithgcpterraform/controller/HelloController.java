@@ -9,4 +9,9 @@ public class HelloController {
     public String hello() {
         return "Hello from Cloud Run!";
     }
+
+    @GetMapping("/hi")
+    public String hi() {
+        return "Hi from Cloud Run!";
+    }
 }
