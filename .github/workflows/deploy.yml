@@ -27,7 +27,7 @@ jobs:
       - name: Debug GCP key
         run: |
           echo "${{ secrets.GCP_SA_KEY }}" > sa-key.json
-          jq . sa-key.json
+          cat sa-key.json | jq .
       # Step 3: Authenticate to GCP using JSON key
       - name: Set up GCP
         uses: google-github-actions/setup-gcloud@v1
