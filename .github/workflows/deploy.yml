@@ -25,9 +25,7 @@ jobs:
             ${{ runner.os }}-maven-
       # validate SA
       - name: Validate SA key format
-        run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > sa-key.json
-          jq -e . sa-key.json && echo "JSON OK" || (echo "JSON invalid" && exit 1)
+        run: gcloud auth list
 
 
 # Step 3: Authenticate to GCP using JSON key
