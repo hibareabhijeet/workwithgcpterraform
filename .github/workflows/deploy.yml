@@ -22,7 +22,10 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
+      # validate SA
+      - name: Debug GCP key
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" | jq .
       # Step 3: Authenticate to GCP using JSON key
       - name: Set up GCP
         uses: google-github-actions/setup-gcloud@v1
