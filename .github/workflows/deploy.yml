@@ -24,10 +24,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       # validate SA
-      - name: Debug GCP key
+      - name: Validate SA key format
         run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > sa-key.json
-          jq -e . sa-key.json
+          echo "${{ secrets.GCP_SA_KEY }}" > sa-key.json
+          jq -e . sa-key.json && echo "JSON OK" || (echo "JSON invalid" && exit 1)
+
 
 # Step 3: Authenticate to GCP using JSON key
       - name: Set up GCP
