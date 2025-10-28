@@ -36,9 +36,14 @@ jobs:
         run: |
           echo "Project ID (from secret): ${{ secrets.GCP_PROJECT_ID }}"
           echo "Project ID (from gcloud): $(gcloud config get-value project)"
-          
 
-      # Step 4: Build & push Docker image
+      - name: Print partial project ID
+        run: |
+          echo "Project ID starts with: $(echo ${{ secrets.GCP_PROJECT_ID }} | cut -c1-6
+      
+      
+
+        # Step 4: Build & push Docker image
       - name: Build & push Docker image
         run: |
           gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/workwithgcpterraform
