@@ -41,8 +41,7 @@ jobs:
       # Step 5: Configure gcloud
       - name: Configure gcloud
         run: |
-          gcloud config set project ${{ env.PROJECT_ID }}
-          gcloud config set run/region ${{ env.REGION }}
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
 
       # Step 6: Verify authentication
       - name: Verify authentication
@@ -51,9 +50,6 @@ jobs:
           gcloud auth list
           echo "Project: $(gcloud config get-value project)"
           echo "Account: $(gcloud config get-value account)"
-
-      - name: Configure gcloud project
-        run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
 
 #      - name: Install gcloud
 #        uses: google-github-actions/setup-gcloud@v1
