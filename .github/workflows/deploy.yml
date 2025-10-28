@@ -23,17 +23,27 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Install gcloud
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          version: "latest"
 
       - name: Authenticate to Google Cloud
-        run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > "${{ github.workspace }}/sa.json"
-          gcloud auth activate-service-account --key-file="${{ github.workspace }}/sa.json"
-          gcloud config set project "${{ secrets.GCP_PROJECT_ID }}"
-          gcloud auth list
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Configure gcloud project
+        run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
+#      - name: Install gcloud
+#        uses: google-github-actions/setup-gcloud@v1
+#        with:
+#          version: "latest"
+#
+#      - name: Authenticate to Google Cloud
+#        run: |
+#          echo "${{ secrets.GCP_SA_KEY }}" > "${{ github.workspace }}/sa.json"
+#          gcloud auth activate-service-account --key-file="${{ github.workspace }}/sa.json"
+#          gcloud config set project "${{ secrets.GCP_PROJECT_ID }}"
+#          gcloud auth list
 
 
 #      # Step 3: Authenticate to GCP using JSON key
