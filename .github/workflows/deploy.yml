@@ -23,9 +23,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Print GCP Project ID
-        run: |
-          echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
 
       # Step 3: Authenticate to GCP using JSON key
       - name: Set up GCP
@@ -34,6 +31,12 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
+
+      - name: Print GCP Project ID
+        run: |
+          echo "Project ID (from secret): ${{ secrets.GCP_PROJECT_ID }}"
+          echo "Project ID (from gcloud): $(gcloud config get-value project)"
+          
 
       # Step 4: Build & push Docker image
       - name: Build & push Docker image
