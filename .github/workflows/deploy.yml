@@ -19,24 +19,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Maven cache
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Check OIDC token
-        run: |
-          echo "Token: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+#      # Step 2: Set up Maven cache
+#      - name: Cache Maven dependencies
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      # Step 4: Set up Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # Step 5: Configure gcloud
+      - name: Configure gcloud
+        run: |
+          gcloud config set project ${{ env.PROJECT_ID }}
+          gcloud config set run/region ${{ env.REGION }}
+
+      # Step 6: Verify authentication
+      - name: Verify authentication
+        run: |
+          echo "Authenticated as:"
+          gcloud auth list
+          echo "Project: $(gcloud config get-value project)"
+          echo "Account: $(gcloud config get-value account)"
 
       - name: Configure gcloud project
         run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
