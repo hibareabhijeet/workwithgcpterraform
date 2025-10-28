@@ -74,7 +74,7 @@ jobs:
 
       - name: Print partial project ID
         run: |
-          echo "Project ID starts with: $(echo ${{ secrets.GCP_PROJECT_ID }} | cut -c1-6)"
+          echo "Project ID starts with: $(echo ${{ secrets.GCP_PROJECT_ID }} | cut -c1-16)"
 
       - name: Confirm gcloud context
         run: |
