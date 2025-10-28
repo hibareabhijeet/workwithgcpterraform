@@ -23,6 +23,9 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Print GCP Project ID
+        run: |
+          echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
 
       # Step 3: Authenticate to GCP using JSON key
       - name: Set up GCP
