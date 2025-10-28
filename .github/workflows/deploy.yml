@@ -13,7 +13,7 @@ jobs:
     steps:
       # Step 1: Checkout repository
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Step 2: Set up Maven cache
       - name: Cache Maven dependencies
@@ -25,7 +25,17 @@ jobs:
             ${{ runner.os }}-maven-
       # validate SA
       - name: Validate SA key format
-        run: gcloud auth list
+        run: |
+          gcloud --version
+          gcloud auth list
+          gcloud config list
+          gcloud config get-value project
+      - name: Activate service account
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" > key.json
+          gcloud auth activate-service-account --key-file=key.json
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
 
 
 # Step 3: Authenticate to GCP using JSON key
