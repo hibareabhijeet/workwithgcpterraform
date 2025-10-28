@@ -7,101 +7,51 @@ permissions:
 on:
   push:
     branches:
-    - main
-    - feature/gitdeploy
+      - main
+      - feature/gitdeploy
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # ✅ Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-#      # Step 2: Set up Maven cache
-#      - name: Cache Maven dependencies
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.m2/repository
-#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: |
-#            ${{ runner.os }}-maven-
+      # ✅ Cache Maven dependencies
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: m2-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            m2-${{ runner.os }}-
 
+      # ✅ GCP authentication using Workload Identity
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
-      # Step 4: Set up Cloud SDK
+      # ✅ Install Cloud SDK
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 5: Configure gcloud
-      - name: Configure gcloud
+      # ✅ Build & Push Docker image
+      - name: Build & Push Docker Image to Cloud Build
         run: |
-          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud builds submit \
+            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/workwithgcpterraform \
+            --format='value(id)'
 
-      # Step 6: Verify authentication
-      - name: Verify authentication
-        run: |
-          echo "Authenticated as:"
-          gcloud auth list
-          echo "Project: $(gcloud config get-value project)"
-          echo "Account: $(gcloud config get-value account)"
-
-#      - name: Install gcloud
-#        uses: google-github-actions/setup-gcloud@v1
-#        with:
-#          version: "latest"
-#
-#      - name: Authenticate to Google Cloud
-#        run: |
-#          echo "${{ secrets.GCP_SA_KEY }}" > "${{ github.workspace }}/sa.json"
-#          gcloud auth activate-service-account --key-file="${{ github.workspace }}/sa.json"
-#          gcloud config set project "${{ secrets.GCP_PROJECT_ID }}"
-#          gcloud auth list
-
-
-#      # Step 3: Authenticate to GCP using JSON key
-#      - name: Set up GCP
-#        uses: google-github-actions/setup-gcloud@v1
-#        with:
-#          project_id: ${{ secrets.GCP_PROJECT_ID }}
-#          service_account_key: ${{ secrets.GCP_SA_KEY }}
-#          export_default_credentials: true
-#      - name: Activate service account
-#        run: |
-#          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-#          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-#          gcloud config set account $(gcloud auth list --filter=status:ACTIVE --format="value(account)")
-
-      - name: Print GCP Project ID
-        run: |
-          echo "Project ID (from secret): ${{ secrets.GCP_PROJECT_ID }}"
-          echo "Project ID (from gcloud): $(gcloud config get-value project)"
-
-      - name: Print partial project ID
-        run: |
-          echo "Project ID starts with: $(echo ${{ secrets.GCP_PROJECT_ID }} | cut -c1-16)"
-
-      - name: Confirm gcloud context
-        run: |
-          gcloud auth list
-          gcloud config list
-          
-
-        # Step 4: Build & push Docker image
-      - name: Build & push Docker image
-        run: |
-          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/workwithgcpterraform --async
-
-      # Step 5: Deploy to Cloud Run
+      # ✅ Deploy to Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy workwithgcpterraform \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/workwithgcpterraform \
-            --platform managed \
             --region europe-west1 \
             --allow-unauthenticated
